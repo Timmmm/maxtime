@@ -1,0 +1,12 @@
+[package]
+name = "stamper"
+version = "0.1.0"
+edition = "2021"
+authors = ["Tim Hutt <tdhutt@gmail.com>"]
+description = "Find the maximum mtime in a directory."
+
+[dependencies]
+anyhow = { version = "1.0.71", features = ["backtrace"] }
+clap = { version = "4.2.7", features = ["derive"] }
+filetime = "0.2.21"
+ignore = "0.4.20"
