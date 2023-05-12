@@ -7,7 +7,7 @@ description = "Find the maximum mtime in a directory."
 
 [dependencies]
 anyhow = { version = "1.0.71", features = ["backtrace"] }
-clap = { version = "4.2.7", features = ["derive"] }
+clap = { version = "4.2.7", features = ["derive", "std"], default-features = false }
 filetime = "0.2.21"
 ignore = "0.4.20"
 
