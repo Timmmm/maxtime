@@ -10,6 +10,7 @@ anyhow = { version = "1.0.71", features = ["backtrace"] }
 clap = { version = "4.2.7", features = ["derive", "std"], default-features = false }
 filetime = "0.2.21"
 ignore = "0.4.20"
+time = { version = "0.3.21", features = ["formatting"] }
 
 [profile.release]
 codegen-units = 1
