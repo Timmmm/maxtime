@@ -29,3 +29,14 @@ jobs:
 
     - name: Run tests
       run: cargo test
+
+    - name: Build wheel
+      run: |
+        pip3 install maturin
+        maturin build --release --strip
+
+    - name: Upload artifacts
+      uses: actions/upload-artifact@v3
+      with:
+        name: wheels
+        path: target/wheels/*.whl
