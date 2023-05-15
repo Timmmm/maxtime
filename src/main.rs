@@ -203,7 +203,7 @@ mod tests {
 
         set_mtime(&root, &mut max_mtime);
 
-        let mut cmd = assert_cmd::Command::cargo_bin("stamper").unwrap();
+        let mut cmd = assert_cmd::Command::cargo_bin("maxtime").unwrap();
 
         cmd.arg(root);
         cmd.assert().success();

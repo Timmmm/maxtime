@@ -19,14 +19,14 @@ jobs:
         include:
           - os: ubuntu-latest
             cargo_extra_flags: --target x86_64-unknown-linux-musl
-            output_executable: target/x86_64-unknown-linux-musl/release/stamper
-            output_executable_upload_as: stamper-linux
+            output_executable: target/x86_64-unknown-linux-musl/release/maxtime
+            output_executable_upload_as: maxtime-linux
           - os: macos-latest
-            output_executable: target/release/stamper
-            output_executable_upload_as: stamper-mac
+            output_executable: target/release/maxtime
+            output_executable_upload_as: maxtime-mac
           - os: windows-latest
-            output_executable: target/release/stamper.exe
-            output_executable_upload_as: stamper-windows.exe
+            output_executable: target/release/maxtime.exe
+            output_executable_upload_as: maxtime-windows.exe
     steps:
       - uses: actions/checkout@v3
 

@@ -1,0 +1,11 @@
+[project]
+name = "maxtime"
+version = "0.2.0"
+description = "Find the maximum mtime in a directory."
+
+[build-system]
+requires = ["maturin>=0.14,<0.15"]
+build-backend = "maturin"
+
+[tool.maturin]
+bindings = "bin"

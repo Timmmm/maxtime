@@ -1,5 +1,5 @@
 [package]
-name = "stamper"
+name = "maxtime"
 version = "0.2.0"
 edition = "2021"
 authors = ["Tim Hutt <tdhutt@gmail.com>"]
