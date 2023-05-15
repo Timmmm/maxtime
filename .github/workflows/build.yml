@@ -32,7 +32,7 @@ jobs:
 
     - name: Build wheel
       run: |
-        pip install maturin
+        pip3 install maturin
         maturin build --release --strip
 
     - name: Upload artifacts
