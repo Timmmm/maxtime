@@ -1,6 +1,6 @@
 [project]
 name = "maxtime"
-version = "0.2.0"
+version = "0.3.0"
 description = "Find the maximum mtime in a directory."
 
 [build-system]

@@ -1,6 +1,6 @@
 [package]
 name = "maxtime"
-version = "0.2.0"
+version = "0.3.0"
 edition = "2021"
 authors = ["Tim Hutt <tdhutt@gmail.com>"]
 description = "Find the maximum mtime in a directory."
