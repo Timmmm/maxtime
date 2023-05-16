@@ -43,6 +43,17 @@ jobs:
       - name: Build
         run: cargo build --verbose --release --locked ${{ matrix.cargo_extra_flags }}
 
+      - name: Build wheel
+        run: |
+          pip3 install maturin
+          maturin build --release --strip --locked ${{ matrix.cargo_extra_flags }}
+
+      - name: Upload wheel
+        uses: actions/upload-artifact@v3
+        with:
+          name: wheels
+          path: target/wheels/*.whl
+
       - name: Rename Output
         shell: pwsh
         run: Move-Item -Path "${{ matrix.output_executable }}" -Destination "target/${{ matrix.output_executable_upload_as }}"
