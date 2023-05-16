@@ -1,8 +1,7 @@
 use std::path::{Path, PathBuf};
-use std::sync::atomic::AtomicBool;
 use std::sync::{Arc, Mutex};
 
-use anyhow::{anyhow, bail, Context, Result};
+use anyhow::{anyhow, Context, Result};
 use clap::Parser;
 use ignore::WalkBuilder;
 
@@ -29,11 +28,11 @@ struct MtimeVisitor {
     // Max mtime for all threads.
     max_mtime: Arc<Mutex<SystemTime>>,
     // If any thread had an error.
-    error: Arc<AtomicBool>,
+    error: Arc<Mutex<Result<()>>>,
 }
 
 impl MtimeVisitor {
-    fn new(max_mtime: Arc<Mutex<SystemTime>>, error: Arc<AtomicBool>) -> Self {
+    fn new(max_mtime: Arc<Mutex<SystemTime>>, error: Arc<Mutex<Result<()>>>) -> Self {
         Self {
             thread_max_mtime: UNIX_EPOCH,
             max_mtime,
@@ -65,13 +64,16 @@ impl ignore::ParallelVisitor for MtimeVisitor {
                         "Error getting mtime for path {}: {e}",
                         entry.path().display()
                     );
-                    self.error.store(true, std::sync::atomic::Ordering::SeqCst);
+                    *self.error.lock().unwrap() = Err(anyhow!(
+                        "error getting mtime for path {}: {e}",
+                        entry.path().display()
+                    ));
                     ignore::WalkState::Quit
                 }
             },
             Err(e) => {
                 eprintln!("Error: {e}");
-                self.error.store(true, std::sync::atomic::Ordering::SeqCst);
+                *self.error.lock().unwrap() = Err(anyhow!("error walking tree: {e}"));
                 ignore::WalkState::Quit
             }
         }
@@ -82,14 +84,14 @@ struct MtimeVisitorBuilder {
     // Max mtime overall.
     max_mtime: Arc<Mutex<SystemTime>>,
     // If any thread had an error.
-    error: Arc<AtomicBool>,
+    error: Arc<Mutex<Result<()>>>,
 }
 
 impl Default for MtimeVisitorBuilder {
     fn default() -> Self {
         Self {
             max_mtime: Arc::new(Mutex::new(UNIX_EPOCH)),
-            error: Arc::new(AtomicBool::new(false)),
+            error: Arc::new(Mutex::new(Ok(()))),
         }
     }
 }
@@ -114,15 +116,11 @@ fn main() -> Result<()> {
         .build_parallel()
         .visit(&mut visitor_builder);
 
-    let error = visitor_builder
-        .error
-        .load(std::sync::atomic::Ordering::SeqCst);
-    let max_mtime = visitor_builder.max_mtime.lock().unwrap().clone();
+    let max_mtime = *visitor_builder.max_mtime.lock().unwrap();
+    let error = std::mem::replace(&mut *visitor_builder.error.lock().unwrap(), Ok(()));
 
-    if error {
-        // Error already printed above.
-        bail!("");
-    }
+    // Exit if any thread had an error.
+    error?;
 
     let max_mtime_nanos = time::OffsetDateTime::from(max_mtime).unix_timestamp_nanos();
 
