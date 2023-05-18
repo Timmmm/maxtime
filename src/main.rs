@@ -46,8 +46,9 @@ impl Drop for MtimeVisitor {
 
 impl MtimeVisitor {
     fn visit_inner(&mut self, entry: std::result::Result<ignore::DirEntry, ignore::Error>) -> Result<()> {
-        // TODO: Context.
-        let mtime = entry?.metadata()?.modified()?;
+        let entry = entry.with_context(|| anyhow!("error reading directory entry"))?;
+        let metadata = entry.metadata().with_context(|| anyhow!("error reading metadata for path {}", entry.path().display()))?;
+        let mtime = metadata.modified().with_context(|| anyhow!("error getting modified time for path {}", entry.path().display()))?;
         self.thread_max_mtime = self.thread_max_mtime.max(mtime);
         Ok(())
     }
