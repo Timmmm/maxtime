@@ -8,12 +8,12 @@ use ignore::WalkBuilder;
 #[derive(Parser)]
 #[command(author, version, about, long_about = None)]
 struct Cli {
-    /// Path to scan (defaults to current directory).
-    path: Option<PathBuf>,
-
     /// Output stamp file. Its contents and mtime will be equal to the max mtime.
     #[arg(long)]
     stamp: Option<PathBuf>,
+
+    /// Path to scan (defaults to current directory).
+    path: Option<PathBuf>,
 }
 
 use std::time::{SystemTime, UNIX_EPOCH};
