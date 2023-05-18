@@ -3,7 +3,7 @@ use std::sync::{Arc, Mutex};
 
 use anyhow::{anyhow, Context, Result};
 use clap::Parser;
-use ignore::WalkBuilder;
+use ignore::{WalkBuilder, DirEntry};
 
 #[derive(Parser)]
 #[command(author, version, about, long_about = None)]
@@ -17,10 +17,6 @@ struct Cli {
 }
 
 use std::time::{SystemTime, UNIX_EPOCH};
-
-pub fn mtime(path: &Path) -> std::io::Result<SystemTime> {
-    std::fs::metadata(path)?.modified()
-}
 
 struct MtimeVisitor {
     // Max mtime for the thread.
@@ -48,32 +44,25 @@ impl Drop for MtimeVisitor {
     }
 }
 
+impl MtimeVisitor {
+    fn visit_inner(&mut self, entry: std::result::Result<ignore::DirEntry, ignore::Error>) -> Result<()> {
+        // TODO: Context.
+        let mtime = entry?.metadata()?.modified()?;
+        self.thread_max_mtime = self.thread_max_mtime.max(mtime);
+        Ok(())
+    }
+}
+
 impl ignore::ParallelVisitor for MtimeVisitor {
     fn visit(
         &mut self,
         entry: std::result::Result<ignore::DirEntry, ignore::Error>,
     ) -> ignore::WalkState {
-        match entry {
-            Ok(entry) => match mtime(entry.path()) {
-                Ok(mtime) => {
-                    self.thread_max_mtime = self.thread_max_mtime.max(mtime);
-                    ignore::WalkState::Continue
-                }
-                Err(e) => {
-                    eprintln!(
-                        "Error getting mtime for path {}: {e}",
-                        entry.path().display()
-                    );
-                    *self.error.lock().unwrap() = Err(anyhow!(
-                        "error getting mtime for path {}: {e}",
-                        entry.path().display()
-                    ));
-                    ignore::WalkState::Quit
-                }
-            },
+
+        match self.visit_inner(entry) {
+            Ok(()) => ignore::WalkState::Continue,
             Err(e) => {
-                eprintln!("Error: {e}");
-                *self.error.lock().unwrap() = Err(anyhow!("error walking tree: {e}"));
+                *self.error.lock().unwrap() = Err(e);
                 ignore::WalkState::Quit
             }
         }
