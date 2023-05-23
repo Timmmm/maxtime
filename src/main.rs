@@ -3,7 +3,7 @@ use std::sync::{Arc, Mutex};
 
 use anyhow::{anyhow, Context, Result};
 use clap::Parser;
-use ignore::{WalkBuilder, DirEntry};
+use ignore::WalkBuilder;
 
 #[derive(Parser)]
 #[command(author, version, about, long_about = None)]
