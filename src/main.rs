@@ -12,6 +12,9 @@ struct Cli {
     #[arg(long)]
     stamp: Option<PathBuf>,
 
+    #[arg(long)]
+    quiet: bool,
+
     /// Path to scan (defaults to current directory).
     path: Option<PathBuf>,
 }
@@ -96,7 +99,7 @@ impl<'s> ignore::ParallelVisitorBuilder<'s> for MtimeVisitorBuilder {
 }
 
 fn main() -> Result<()> {
-    let cli = Cli::parse();
+    let cli: Cli = Cli::parse();
 
     let path = cli.path.as_deref().unwrap_or_else(|| Path::new("."));
 
@@ -114,8 +117,10 @@ fn main() -> Result<()> {
 
     let max_mtime_nanos = time::OffsetDateTime::from(max_mtime).unix_timestamp_nanos();
 
-    // Print the maximum mtime.
-    println!("{}", max_mtime_nanos);
+    if !cli.quiet {
+        // Print the maximum mtime.
+        println!("{}", max_mtime_nanos);
+    }
 
     // If requested save it to a file and set that file's mtime to the
     // maximum mtime.
